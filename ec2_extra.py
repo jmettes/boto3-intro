@@ -37,7 +37,24 @@ instances = ec2.create_instances(ImageId='ami-11032472',
 print('launching')
 
 instances[0].wait_until_running()
+print('running')
+ip_address = ec2.Instance(instances[0].id).public_ip_address
+
+import time
+import socket
+
+while True:
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.settimeout(1)
+    try:
+        s.connect((ip_address, 22))
+        break
+    except:
+        pass
+
+    s.close()
+    time.sleep(1)
 
 print('running')
 print('might need to run: chmod 400 cpug.pem')
-print('type: ssh -i cpug.pem ec2-user@' + ec2.Instance(instances[0].id).public_ip_address)
+print('type: ssh -i cpug.pem ec2-user@' + ip_address)

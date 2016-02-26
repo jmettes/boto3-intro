@@ -36,7 +36,7 @@ instances = ec2.create_instances(ImageId='ami-11032472',
 print('launching')
 
 instances[0].wait_until_running()
-print('running')
+print('running (and installing web server)')
 ip_address = ec2.Instance(instances[0].id).public_ip_address
 
 import time
@@ -54,5 +54,4 @@ while True:
     s.close()
     time.sleep(1)
 
-print('running (and installing web server)')
 print('type: open http://' + ip_address)

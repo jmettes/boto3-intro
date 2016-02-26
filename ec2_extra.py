@@ -43,6 +43,7 @@ ip_address = ec2.Instance(instances[0].id).public_ip_address
 import time
 import socket
 
+print('running')
 while True:
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.settimeout(1)
@@ -55,6 +56,5 @@ while True:
     s.close()
     time.sleep(1)
 
-print('running')
 print('might need to run: chmod 400 cpug.pem')
 print('type: ssh -i cpug.pem ec2-user@' + ip_address)

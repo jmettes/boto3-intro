@@ -1,0 +1,93 @@
+{
+    "Resources": {
+        "Ec2Instance": {
+            "Properties": {
+                "IamInstanceProfile": {
+                    "Ref": "PugInstanceProfile"
+                },
+                "ImageId": "ami-11032472",
+                "InstanceType": "t2.micro",
+                "KeyName": "cpug",
+                "SecurityGroups": [
+                    {
+                        "Ref": "HTTPSecurityGroup"
+                    }
+                ],
+                "UserData": {
+                    "Fn::Base64": "#!/bin/bash\n# install web server\nyum install httpd -y\naws s3 cp s3://cpug/image.png /var/www/icons/image.png\necho \"<img src='../icons/image.png'>\" > /var/www/html/index.html\nservice httpd start"
+                }
+            },
+            "Type": "AWS::EC2::Instance"
+        },
+        "HTTPSecurityGroup": {
+            "Properties": {
+                "GroupDescription": "Enable HTTP access via port 80",
+                "SecurityGroupIngress": [
+                    {
+                        "CidrIp": "0.0.0.0/0",
+                        "FromPort": "80",
+                        "IpProtocol": "tcp",
+                        "ToPort": "80"
+                    },
+                    {
+                        "CidrIp": "0.0.0.0/0",
+                        "FromPort": "22",
+                        "IpProtocol": "tcp",
+                        "ToPort": "22"
+                    }
+                ]
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        },
+        "PugInstanceProfile": {
+            "Properties": {
+                "Path": "/",
+                "Roles": [
+                    {
+                        "Ref": "PugRole"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::InstanceProfile"
+        },
+        "PugRole": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "ec2.amazonaws.com"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "s3:*"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::cpug/*"
+                                    ]
+                                }
+                            ]
+                        },
+                        "PolicyName": "PugPolicy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        }
+    }
+}
